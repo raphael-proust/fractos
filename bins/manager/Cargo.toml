@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 raylib = "3.7.0"
 fractal = { path = "../../libs/fractal" }
+complex = { path = "../../libs/complex" }

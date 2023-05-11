@@ -1,15 +1,20 @@
 mod libs;
-use fractal::Intensity;
+use fractal::{Intensity,Julia,Fractal};
+use complex::Complex;
 use raylib::{color::Color, prelude::*};
 
 fn main() {
     let (mut rl, thrd) = raylib::init().size(800, 600).title("Fractos").build();
 
     let mut intensities : Vec::<Intensity> = vec![];
+    let j = Julia { c: Complex::new(0.3, 0.5), divergence_threshold_square: 16. };
     for x in 0..600 {
-        for _ in 0..800 {
-        let divergence = x as f32 / 300.;
-        intensities.push(Intensity{ module: 16., divergence })
+        for y in 0..800 {
+            let re: f64 = (-1.0) + (2.0 * x as f64 / 600 as f64);
+            let im: f64 = (-1.0) + (2.0 * y as f64 / 600 as f64);
+            let c : Complex = Complex { re, im };
+            let i : Intensity = j.eval(10, c);
+            intensities.push(i);
       }
     };
 

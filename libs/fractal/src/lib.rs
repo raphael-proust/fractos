@@ -9,8 +9,8 @@ pub trait Fractal {
     fn eval(&self, _: u16, _: Complex) -> Intensity;
 }
 pub struct Julia {
-    c: Complex,
-    divergence_threshold_square: f64,
+    pub c: Complex,
+    pub divergence_threshold_square: f64,
 }
 
 impl Julia {
