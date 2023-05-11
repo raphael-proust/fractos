@@ -55,8 +55,8 @@ pub fn render(
     color_map: &impl ColorMap,
     d: &mut RaylibDrawHandle,
 ) -> () {
-    for x in 0..xres {
-        for y in 0..yres {
+    for y in 0..yres {
+        for x in 0..xres {
             let index: usize = (x + y * xres) as usize;
             let c = color_map.of_intensity(&intensities[index]);
             d.draw_pixel(x as i32, y as i32, c);
