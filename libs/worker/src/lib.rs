@@ -1,10 +1,6 @@
-use fractal::*;
-use messages::*;
+use fractal::{Fractal,Intensity,Julia};
+use messages::{Answer,Task};
 use complex::Complex;
-
-pub fn task0 () -> Task  {
-    todo!()
-}
 
 pub fn handle_task (task : Task) -> Answer {
     let yy = task.resolution.y.get();
