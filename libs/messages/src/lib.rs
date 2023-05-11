@@ -1,6 +1,6 @@
-mod point;
-mod range;
-mod resolution;
+pub mod point;
+pub mod range;
+pub mod resolution;
 
 use std::num::NonZeroU32;
 
@@ -15,7 +15,7 @@ pub struct Task {
 }
 
 pub struct Answer {
-    pub matrix: Vec<(i32, f32)>,
+    pub matrix: Vec<(u32, f32)>,
 }
 
 enum Message {
