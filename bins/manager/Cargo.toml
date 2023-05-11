@@ -10,3 +10,4 @@ raylib = "3.7.0"
 fractal = { path = "../../libs/fractal" }
 complex = { path = "../../libs/complex" }
 messages = {path = "../../libs/messages"}
+tokio = { version = "1.28", features = ["rt", "net", "macros", "rt-multi-thread", "sync"] }
