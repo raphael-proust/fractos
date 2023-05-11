@@ -8,7 +8,7 @@ use range::Range;
 use resolution::Resolution;
 
 pub struct Task {
-    pub algo: String,
+    pub algo: fractal::Julia,
     pub resolution: Resolution,
     pub range: Range,
     pub itermax: NonZeroU32,
