@@ -1,12 +1,9 @@
 mod point;
 mod range;
+mod resolution;
 
 use range::Range;
-
-pub struct Resolution {
-    x: u32,
-    y: u32,
-}
+use resolution::Resolution;
 
 pub struct Task {
     algo: String,
