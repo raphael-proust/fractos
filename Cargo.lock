@@ -20,6 +20,9 @@ version = "0.1.0"
 [[package]]
 name = "messages"
 version = "0.1.0"
+dependencies = [
+ "fractal",
+]
 
 [[package]]
 name = "worker"
