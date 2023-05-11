@@ -7,8 +7,17 @@ name = "complex"
 version = "0.1.0"
 
 [[package]]
+name = "complex"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "59c44398b2bcc1ba55a1d25a759562cf135356fa05330d0d93f9609c7e8266ac"
+
+[[package]]
 name = "fractal"
 version = "0.1.0"
+dependencies = [
+ "complex 0.8.0",
+]
 
 [[package]]
 name = "manager"
