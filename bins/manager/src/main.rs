@@ -13,7 +13,7 @@ fn main() {
             let re: f64 = (-1.0) + (2.0 * x as f64 / 600 as f64);
             let im: f64 = (-1.0) + (2.0 * y as f64 / 600 as f64);
             let c : Complex = Complex { re, im };
-            let i : Intensity = j.eval(10, c);
+            let i : Intensity = j.eval(100, c);
             intensities.push(i);
       }
     };
