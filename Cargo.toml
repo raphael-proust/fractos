@@ -1,2 +1,5 @@
+[workspace.dependencies]
+serde = { version = "1.0.163", features = ["derive"] }
+
 [workspace]
 members = [ "bins/*", "libs/*" ]

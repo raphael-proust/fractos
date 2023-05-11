@@ -1,5 +1,8 @@
 use crate::point::Point;
 
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Range {
     min: Point,
     max: Point,
