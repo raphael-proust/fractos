@@ -17,11 +17,11 @@ impl Range {
         }
     }
 
-    pub fn min(r: Range) -> Point {
-        r.min
+    pub fn min(&self) -> Point {
+        self.min
     }
 
-    pub fn max(r: Range) -> Point {
-        r.max
+    pub fn max(&self) -> Point {
+        self.max
     }
 }
