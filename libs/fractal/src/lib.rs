@@ -5,22 +5,17 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Intensity {
     pub module: f64,
-    pub divergence: u16,
+    pub divergence: f32,
 }
 
 pub trait Fractal {
-    fn eval(&self, _: u16, _: Complex) -> Intensity {
-        return Intensity {
-            module: 0.,
-            divergence: 0,
-        };
-    }
+    fn eval(&self, _: u16, _: Complex) -> Intensity;
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Julia {
-    c: Complex,
-    divergence_threshold_square: f64,
+    pub c: Complex,
+    pub divergence_threshold_square: f64,
 }
 
 impl Julia {
@@ -38,6 +33,7 @@ impl Fractal for Julia {
             acc = self.next(acc)
         }
         let module = complex::sqmodule(&acc);
+        let divergence = divergence as f32 / maxiter as f32;
         Intensity { module, divergence }
     }
 }
@@ -53,7 +49,7 @@ mod tests {
         };
         let Intensity { module, divergence } = j.eval(10, Complex::new(0., 0.));
         assert_eq!(module, 0.);
-        assert_eq!(divergence, 10);
+        assert_eq!(divergence, 1.);
     }
 
     #[test]
