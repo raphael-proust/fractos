@@ -12,7 +12,7 @@ pub struct Task {
     pub algo: fractal::Julia,
     pub resolution: Resolution,
     pub range: Range,
-    pub itermax: NonZeroU32,
+    pub itermax: NonZeroU16,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
