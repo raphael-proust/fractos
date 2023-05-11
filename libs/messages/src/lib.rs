@@ -2,11 +2,12 @@ pub mod point;
 pub mod range;
 pub mod resolution;
 
-use std::num::NonZeroU32;
-
 use range::Range;
 use resolution::Resolution;
+use serde::{Deserialize, Serialize};
+use std::num::NonZeroU32;
 
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Task {
     pub algo: fractal::Julia,
     pub resolution: Resolution,
@@ -14,13 +15,9 @@ pub struct Task {
     pub itermax: NonZeroU32,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Answer {
-    pub matrix: Vec<(u32, f32)>,
-}
-
-enum Message {
-    Task(Task),
-    Answer(Answer),
+    pub matrix: Vec<fractal::Intensity>,
 }
 
 #[cfg(test)]

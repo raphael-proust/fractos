@@ -1,5 +1,8 @@
 use complex::Complex;
 
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Intensity {
     pub module: f64,
     pub divergence: u16,
@@ -13,6 +16,8 @@ pub trait Fractal {
         };
     }
 }
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Julia {
     c: Complex,
     divergence_threshold_square: f64,

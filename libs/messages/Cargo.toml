@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 fractal = {path= "../fractal"}
+serde = { workspace = true }
