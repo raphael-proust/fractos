@@ -25,7 +25,7 @@ fn main() {
         800,
         600,
         &intensities,
-        &libs::render::Grayscale,
+        &libs::render::Fire,
         &mut d,
     );
     }

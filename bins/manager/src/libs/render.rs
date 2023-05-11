@@ -1,6 +1,6 @@
 use fractal::Intensity;
 
-use raylib::{color::Color, prelude::*};
+use raylib::{color::Color, color::rcolor, prelude::*};
 
 pub trait ColorMap {
     fn of_intensity(&self, intensity: &Intensity) -> Color;
@@ -11,7 +11,26 @@ pub struct Grayscale;
 impl ColorMap for Grayscale {
     fn of_intensity(&self, intensity: &Intensity) -> Color {
         let Intensity { divergence, module:_ } = intensity;
-        if divergence > &0.99 { Color::BLACK } else { Color::WHITE }
+        let div = divergence * 255.;
+        let div = div as i64;
+        let div = div.clamp(0, 255);
+        let div = div as u8;
+        let color = rcolor(div, div, div, 255);
+        color
+    }
+}
+
+pub struct Fire;
+
+impl ColorMap for Fire {
+    fn of_intensity(&self, intensity: &Intensity) -> Color {
+        let Intensity { divergence, module:_ } = intensity;
+        let div = divergence * 255.;
+        let div = div as i64;
+        let div = div.clamp(0, 255);
+        let div = div as u8;
+        let color = rcolor(div, div/2, div/4, 255);
+        color
     }
 }
 
