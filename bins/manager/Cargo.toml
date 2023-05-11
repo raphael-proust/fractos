@@ -9,3 +9,4 @@ edition = "2021"
 raylib = "3.7.0"
 fractal = { path = "../../libs/fractal" }
 complex = { path = "../../libs/complex" }
+messages = {path = "../../libs/messages"}
