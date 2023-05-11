@@ -2,18 +2,20 @@ mod point;
 mod range;
 mod resolution;
 
+use std::num::NonZeroU32;
+
 use range::Range;
 use resolution::Resolution;
 
 pub struct Task {
-    algo: String,
-    resolution: Resolution,
-    range: Range,
-    itermax: u32,
+    pub algo: String,
+    pub resolution: Resolution,
+    pub range: Range,
+    pub itermax: NonZeroU32,
 }
 
 pub struct Answer {
-    matrix: Vec<(i32, f32)>,
+    pub matrix: Vec<(i32, f32)>,
 }
 
 enum Message {
