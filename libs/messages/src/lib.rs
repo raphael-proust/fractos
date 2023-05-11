@@ -1,4 +1,7 @@
 mod point;
+mod range;
+
+use range::Range;
 
 pub struct Resolution {
     x: u32,
