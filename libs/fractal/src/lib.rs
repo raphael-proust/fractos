@@ -1,6 +1,6 @@
 use complex::Complex;
 
-pub struct Intensity { module: f64, divergence: u16 }
+pub struct Intensity { pub module: f64, pub divergence: u16 }
 
 pub trait Fractal {
     fn eval(&self, _: u16, _: Complex) -> Intensity {
@@ -30,9 +30,12 @@ impl Fractal for Julia {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     #[test]
     fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
+        let j = Julia { c: Complex::new(0.,0.), divergence_threshold_square: 16.};
+        let Intensity { module, divergence } = j.eval(10, Complex::new(0.,0.));
+        assert_eq!(module, 0.);
+        assert_eq!(divergence, 10);
     }
 }

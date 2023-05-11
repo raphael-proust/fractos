@@ -4,6 +4,12 @@ pub struct Complex {
     pub im: f64,
 }
 
+impl Complex {
+    pub fn new(re: f64, im: f64) -> Self {
+        Complex { re, im }
+    }
+}
+
 pub fn sqmodule(x: &Complex) -> f64 {
     (x.re * x.re) + (x.im * x.im)
 }
