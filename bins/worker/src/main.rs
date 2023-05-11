@@ -37,7 +37,7 @@ fn main() -> std::io::Result<()> {
     let task: Task = serde_json::from_slice(&msg).unwrap();
     use worker::handle_task;
 
-    let answer: Answer = handle_task(task);
+    let answer: Answer = handle_task(&task);
     let serialized_answer = serde_json::to_vec(&answer).unwrap();
 
     let _ = stream.write(&serialized_answer);

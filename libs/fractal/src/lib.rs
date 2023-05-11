@@ -2,7 +2,7 @@ use complex::Complex;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct Intensity {
     pub module: f64,
     pub divergence: f32,
