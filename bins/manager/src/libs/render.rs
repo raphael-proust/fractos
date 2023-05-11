@@ -10,18 +10,10 @@ pub struct Grayscale;
 
 impl ColorMap for Grayscale {
     fn of_intensity(&self, intensity: &Intensity) -> Color {
-        let Intensity { .. } = intensity;
-        todo!();
+        let Intensity { divergence, module:_ } = intensity;
+        if divergence > &0.99 { Color::BLACK } else { Color::WHITE }
     }
 }
-
-// pub fn init_display(x: u32, y: u32) -> RaylibDrawHandle {
-//     let (mut rl, thrd) = raylib::init().size(x, y).title("BIH").build();
-
-//     let mut d = rl.begin_drawing(&thrd);
-//     d.clear_background(Color::WHITE);
-//     d
-// }
 
 pub fn render(
     xres: u32,
