@@ -1,10 +1,10 @@
 use messages::Answer;
 use messages::Task;
-use serde::{Deserialize, Serialize};
 
 use clap::Parser;
 use std::io::Read;
-use std::net::{TcpListener, TcpStream};
+use std::io::Write;
+use std::net::TcpStream;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -34,11 +34,12 @@ fn main() -> std::io::Result<()> {
 
     let mut msg = vec![0_u8; size];
     stream.read_exact(&mut msg)?;
-    let task: messages::Task = serde_json::from_slice(&msg).unwrap();
+    let task: Task = serde_json::from_slice(&msg).unwrap();
     use worker::handle_task;
 
-    let answer = handle_task(task);
-    let _serialized_answer = serde_json::to_vec(&answer).unwrap();
+    let answer: Answer = handle_task(task);
+    let serialized_answer = serde_json::to_vec(&answer).unwrap();
 
+    let _ = stream.write(&serialized_answer);
     Ok(())
 }
