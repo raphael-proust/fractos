@@ -1,4 +1,4 @@
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct Complex {
     pub re: f64,
     pub im: f64,
@@ -20,10 +20,30 @@ pub fn sq(x: Complex) -> Complex {
         im: 2. * (x.re * x.im),
     }
 }
-pub fn add(x: Complex, c: &Complex) -> Complex {
-    Complex {
-        re: x.re + c.re,
-        im: x.im + x.im,
+
+// operator overloading
+
+use std::ops;
+
+impl ops::Add<Complex> for Complex {
+    type Output = Complex;
+
+    fn add(self, rhs: Complex) -> Complex {
+        Complex {
+            re: self.re + rhs.re,
+            im: self.im + rhs.im,
+        }
+    }
+}
+
+impl ops::Sub<Complex> for Complex {
+    type Output = Complex;
+
+    fn sub(self, rhs: Complex) -> Complex {
+        Complex {
+            re: self.re - rhs.re,
+            im: self.im - rhs.im,
+        }
     }
 }
 
