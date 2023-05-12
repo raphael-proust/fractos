@@ -4,27 +4,28 @@ use messages::{Answer, Task};
 
 use rayon::prelude::*;
 
-fn complex_of_pos(index: u32, task: &Task, yy: u32) -> Complex {
+fn complex_of_pos(index: u32, task: &Task, y_res: u32) -> Complex {
     let f_index: f64 = index.into();
     let r_delta = task.range.max().x() - task.range.min().x();
     let i_delta = task.range.max().y() - task.range.min().y();
-    let yy = <u32 as Into<f64>>::into(yy);
-    let r_factor: f64 = f_index / yy;
-    let i_factor: f64 = f_index % yy;
+    let x_res = <u32 as Into<f64>>::into(task.resolution.x.get());
+    let i_factor: f64 = f_index / x_res;
+    let y_res = <u32 as Into<f64>>::into(y_res);
+    let r_factor: f64 = f_index % x_res;
     Complex::new(
-        task.range.min().x() + r_delta * r_factor,
-        task.range.min().y() + i_delta * i_factor,
+        task.range.min().x() + r_delta / x_res * r_factor,
+        task.range.min().y() + i_delta / y_res * i_factor,
     )
 }
 
 pub(crate) fn seq_handle_task(task: &Task) -> Answer {
-    let yy = task.resolution.y.get();
+    let y_res = task.resolution.y.get();
     let size: u32 = task.resolution.x.get() * task.resolution.y.get();
     let Algo::Julia(algo) = &task.algo;
     let res: Vec<Intensity> = (0..size)
         .into_iter()
         .map(|index| {
-            let c = complex_of_pos(index, task, yy);
+            let c = complex_of_pos(index, task, y_res);
             algo.eval(task.itermax.into(), c)
         })
         .collect();
@@ -32,13 +33,13 @@ pub(crate) fn seq_handle_task(task: &Task) -> Answer {
 }
 
 pub(crate) fn par_handle_task(task: &Task) -> Answer {
-    let yy = task.resolution.y.get();
+    let y_res = task.resolution.y.get();
     let size: u32 = task.resolution.x.get() * task.resolution.y.get();
     let Algo::Julia(algo) = &task.algo;
     let res: Vec<fractal::Intensity> = (0..size)
         .into_par_iter()
         .map(|index| {
-            let c = complex_of_pos(index, task, yy);
+            let c = complex_of_pos(index, task, y_res);
             algo.eval(task.itermax.into(), c)
         })
         .collect();
