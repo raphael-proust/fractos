@@ -2,17 +2,51 @@ pub mod point;
 pub mod range;
 pub mod resolution;
 
+use fractal;
 use range::Range;
 use resolution::Resolution;
 use serde::{Deserialize, Serialize};
-use std::num::NonZeroU16;
+use std::num::{NonZeroU16, NonZeroU32};
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum Algo {
+    Julia(fractal::Julia),
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Task {
-    pub algo: fractal::Julia,
+    pub algo: Algo,
     pub resolution: Resolution,
     pub range: Range,
     pub itermax: NonZeroU16,
+}
+
+impl Task {
+    pub fn new(
+        algo: Algo,
+        resx: u32,
+        resy: u32,
+        rp0x: f64,
+        rp0y: f64,
+        rp1x: f64,
+        rp1y: f64,
+        itermax: u16,
+    ) -> Task {
+        Task {
+            algo,
+
+            resolution: Resolution {
+                x: NonZeroU32::new(resx).unwrap(),
+                y: NonZeroU32::new(resy).unwrap(),
+            },
+            range: Range::new(
+                point::Point::new(rp0x, rp0y).unwrap(),
+                point::Point::new(rp1x, rp1y).unwrap(),
+            )
+            .unwrap(),
+            itermax: NonZeroU16::new(itermax).unwrap(),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]

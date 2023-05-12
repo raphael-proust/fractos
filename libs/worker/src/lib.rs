@@ -1,6 +1,6 @@
 use complex::Complex;
 use fractal::{Fractal, Intensity};
-use messages::{Answer, Task};
+use messages::{Algo, Answer, Task};
 
 use rayon::prelude::*;
 
@@ -20,11 +20,12 @@ fn complex_of_pos(index: u32, task: &Task, yy: u32) -> Complex {
 pub(crate) fn seq_handle_task(task: &Task) -> Answer {
     let yy = task.resolution.y.get();
     let size: u32 = task.resolution.x.get() * task.resolution.y.get();
+    let Algo::Julia(algo) = &task.algo;
     let res: Vec<Intensity> = (0..size)
         .into_iter()
         .map(|index| {
             let c = complex_of_pos(index, task, yy);
-            task.algo.eval(task.itermax.into(), c)
+            algo.eval(task.itermax.into(), c)
         })
         .collect();
     Answer { matrix: res }
@@ -33,11 +34,12 @@ pub(crate) fn seq_handle_task(task: &Task) -> Answer {
 pub(crate) fn par_handle_task(task: &Task) -> Answer {
     let yy = task.resolution.y.get();
     let size: u32 = task.resolution.x.get() * task.resolution.y.get();
+    let Algo::Julia(algo) = &task.algo;
     let res: Vec<fractal::Intensity> = (0..size)
         .into_par_iter()
         .map(|index| {
             let c = complex_of_pos(index, task, yy);
-            task.algo.eval(task.itermax.into(), c)
+            algo.eval(task.itermax.into(), c)
         })
         .collect();
     Answer { matrix: res }
@@ -52,7 +54,7 @@ mod tests {
     use crate::{par_handle_task, seq_handle_task};
     use complex::Complex;
     use fractal::Julia;
-    use messages::{point::Point, range::Range, resolution::Resolution, Answer, Task};
+    use messages::{point::Point, range::Range, resolution::Resolution, Algo, Answer, Task};
     use std::num::{NonZeroU16, NonZeroU32};
 
     #[test]
@@ -62,7 +64,7 @@ mod tests {
             divergence_threshold_square: 16.,
         };
         let task = Task {
-            algo: j,
+            algo: Algo::Julia(j),
 
             resolution: Resolution {
                 x: NonZeroU32::new(800).unwrap(),
