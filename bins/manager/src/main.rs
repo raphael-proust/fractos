@@ -8,13 +8,14 @@ use worker;
 
 fn compute_intensities(xres: u32, yres: u32, iter_max: u16, intensities: &mut Vec<Intensity>, fractal: &impl Fractal, xblocks: u32, yblocks: u32, block_size: u32,) {
     intensities.clear();
-    for y in 0..yblocks {
-        for x in 0..xblocks {
-            let c: Complex = complex_of_window_position(x * block_size, y * block_size, xres, yres);
-            let i: Intensity = fractal.eval(iter_max, c);
-            intensities.push(i);
-        }
-    }
+    let algo = fractal.clone().into_algo();
+    let taskxres = xres / block_size;
+    let taskyres = yres / block_size;
+    let task = Task::new(algo, taskxres, taskyres, -1.0, -1.0, 1.0, 1.0, iter_max);
+    let Answer {
+        matrix: mut par_result,
+    } = worker::handle_task(&task);
+    intensities.append(&mut par_result);
 }
 
 fn complex_of_window_position(xpos: u32, ypos: u32, xres: u32, yres: u32) -> Complex {
