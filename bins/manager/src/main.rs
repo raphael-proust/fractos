@@ -88,6 +88,7 @@ fn main() {
             None => (),
             Some(key) => match key {
                 KeyboardKey::KEY_J => {
+                    println!("j");
                     max_iter = (max_iter * 5) / 6;
                     dirty = true;
                 }
@@ -95,16 +96,22 @@ fn main() {
                     max_iter = (max_iter * 6) / 5;
                     dirty = true;
                 }
+                KeyboardKey::KEY_S => {
+                    println!("Saving to \"out.png\"");
+                    rl.take_screenshot(&thrd, "out.png");
+                }
                 _ => (),
             },
         };
 
-        let new_mouse_pos =  rl.get_mouse_position();
-        if mouse_pos != new_mouse_pos {
+        let is_mouse_down = rl.is_mouse_button_down(raylib::consts::MouseButton::MOUSE_LEFT_BUTTON);
+
+        if is_mouse_down {
             dirty = true;
-            block_size = starting_block_size;
-            mouse_pos = new_mouse_pos;
-            fractal.c = complex_of_window_position(mouse_pos.x as u32, mouse_pos.y as u32, xres, yres);
+            let mouse_pos = rl.get_mouse_position();
+            let xpos = mouse_pos.x as u32;
+            let ypos = mouse_pos.y as u32;
+            fractal.c = complex_of_window_position(xpos, ypos, xres, yres);
         }
 
         if dirty {
@@ -132,17 +139,23 @@ fn main() {
             );
         }
 
-        let mut d = rl.begin_drawing(&thrd);
-        d.clear_background(Color::WHITE);
-        libs::render::render_averaged_chunk(
-            0,
-            0,
-            xres,
-            yres,
-            block_size,
-            &intensities,
-            &libs::render::Wow,
-            &mut d,
-        );
+        {
+            let mut d = rl.begin_drawing(&thrd);
+            d.clear_background(Color::WHITE);
+            libs::render::render_averaged_chunk(
+                0,
+                0,
+                xres,
+                yres,
+                block_size,
+                &intensities,
+                &libs::render::Fire,
+                &mut d,
+            );
+        }
+        if args.save != "" {
+            rl.take_screenshot(&thrd, &args.save);
+            std::process::exit(0)
+        }
     }
 }
