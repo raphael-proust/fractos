@@ -40,7 +40,8 @@ fn next_block_size_down(b: u32) -> u32 {
     }
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let args = libs::args::Args::parse();
 
     let mut max_iter = args.max_iter;
