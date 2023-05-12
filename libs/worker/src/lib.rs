@@ -47,7 +47,7 @@ pub fn handle_task(task: &Task) -> Answer {
 mod tests {
     use crate::{dispatch_task, handle_task, Dispatch};
     use complex::Complex;
-    use fractal::{Algo, Julia};
+    use fractal::{Algo, Julia, Mandelbrot};
     use messages::{Answer, Task};
 
     #[test]
@@ -56,10 +56,29 @@ mod tests {
             c: Complex::new(0., 0.),
             divergence_threshold_square: 16.,
         };
-        let task = Task::new(Algo::Julia(j), 800, 600, -1.0, -1.0, 1.0, 1.0, 100);
-        let Answer { matrix: par_result } = handle_task(&task);
-        let Answer { matrix: seq_result } = dispatch_task(&task, Dispatch::Seq);
+        let task1 = Task::new(Algo::Julia(j), 800, 600, -1.0, -1.0, 1.0, 1.0, 100);
+        let Answer { matrix: par_julia } = handle_task(&task1);
+        let Answer { matrix: seq_julia } = dispatch_task(&task1, Dispatch::Seq);
 
-        assert!(seq_result.iter().eq(par_result.iter()));
+        assert!(seq_julia.iter().eq(par_julia.iter()));
+
+        let task2 = Task::new(
+            Algo::Mandelbrot(Mandelbrot {}),
+            800,
+            600,
+            -1.0,
+            -1.0,
+            1.0,
+            1.0,
+            100,
+        );
+        let Answer {
+            matrix: par_mandelbrot,
+        } = handle_task(&task2);
+        let Answer {
+            matrix: seq_mandelbrot,
+        } = dispatch_task(&task2, Dispatch::Seq);
+
+        assert!(seq_mandelbrot.iter().eq(par_mandelbrot.iter()));
     }
 }
