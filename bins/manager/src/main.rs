@@ -6,21 +6,11 @@ use messages::{Answer, Task};
 use raylib::{color::Color, prelude::*};
 use worker;
 
-const XRES: u32 = 800;
-const YRES: u32 = 600;
-
-fn compute_intensities(
-    iter_max: u16,
-    intensities: &mut Vec<Intensity>,
-    fractal: &impl Fractal,
-    xblocks: u32,
-    yblocks: u32,
-    block_size: u32,
-) {
+fn compute_intensities(xres: u32, yres: u32, iter_max: u16, intensities: &mut Vec<Intensity>, fractal: &impl Fractal, xblocks: u32, yblocks: u32, block_size: u32,) {
     intensities.clear();
     for y in 0..yblocks {
         for x in 0..xblocks {
-            let c: Complex = complex_of_window_position(x * block_size, y * block_size, XRES, YRES);
+            let c: Complex = complex_of_window_position(x * block_size, y * block_size, xres, yres);
             let i: Intensity = fractal.eval(iter_max, c);
             intensities.push(i);
         }
@@ -37,12 +27,17 @@ fn complex_of_window_position(xpos: u32, ypos: u32, xres: u32, yres: u32) -> Com
 fn main() {
     let args = libs::args::Args::parse();
 
-    let (mut rl, thrd) = raylib::init()
-        .size(XRES as i32, YRES as i32)
-        .title("Fractos")
-        .build();
+    let args = libs::args::Args::parse();
 
     let mut max_iter = args.max_iter;
+    let mut block_size = args.block_size;
+    let xres = args.resolution.xres;
+    let yres = args.resolution.yres;
+
+    let (mut rl, thrd) = raylib::init()
+        .size(xres as i32, yres as i32)
+        .title("Fractos")
+        .build();
 
     let mut intensities: Vec<Intensity> = vec![];
 
@@ -51,13 +46,13 @@ fn main() {
         divergence_threshold_square: 16.,
     };
 
-    // TODO: block_size \in 1, 2, 5, 10
-    let mut block_size = 5;
 
-    let mut xblocks = XRES / block_size;
-    let mut yblocks = YRES / block_size;
+    let mut xblocks = xres / block_size;
+    let mut yblocks = yres / block_size;
 
     compute_intensities(
+        xres,
+        yres,
         max_iter,
         &mut intensities,
         &fractal,
@@ -96,11 +91,13 @@ fn main() {
             let mouse_pos = rl.get_mouse_position();
             let xpos = mouse_pos.x as u32;
             let ypos = mouse_pos.y as u32;
-            fractal.c = complex_of_window_position(xpos, ypos, XRES, YRES);
+            fractal.c = complex_of_window_position(xpos, ypos, xres, yres);
         }
 
         if dirty {
             compute_intensities(
+                xres,
+                yres,
                 max_iter,
                 &mut intensities,
                 &fractal,
@@ -115,8 +112,8 @@ fn main() {
         libs::render::render_averaged_chunk(
             0,
             0,
-            XRES,
-            YRES,
+            xres,
+            yres,
             block_size,
             &intensities,
             &libs::render::Fire,
