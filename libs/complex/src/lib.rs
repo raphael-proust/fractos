@@ -14,13 +14,22 @@ impl Complex {
 
 impl std::fmt::Display for Complex {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        f.write_fmt(format_args!("({},{})",self.re, self.im))
+        f.write_fmt(format_args!("({},{})", self.re, self.im))
     }
 }
 
 pub fn sqmodule(x: &Complex) -> f64 {
     (x.re * x.re) + (x.im * x.im)
 }
+
+pub fn add(x: Complex, y: Complex) -> Complex {
+    Complex {
+        re: x.re + y.re,
+        im: x.im * y.im,
+    }
+}
+
+pub const CZERO: Complex = Complex { re: 0.0, im: 0.0 };
 
 pub fn sq(x: Complex) -> Complex {
     Complex {

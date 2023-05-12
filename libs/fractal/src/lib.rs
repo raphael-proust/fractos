@@ -20,11 +20,23 @@ pub struct Julia {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Mandelbrot {
+    pub c: Complex,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Algo {
     Julia(Julia),
+    Mandelbrot(Mandelbrot),
 }
 
 impl Julia {
+    fn next(&self, x: Complex) -> Complex {
+        complex::sq(x) + self.c
+    }
+}
+
+impl Mandelbrot {
     fn next(&self, x: Complex) -> Complex {
         complex::sq(x) + self.c
     }
@@ -45,6 +57,40 @@ impl Fractal for Julia {
 
     fn into_algo(&self) -> Algo {
         Algo::Julia(self.clone())
+    }
+}
+
+impl Fractal for Mandelbrot {
+    fn eval(self: &Mandelbrot, maxiter: u16, x: Complex) -> Intensity {
+        let mut divergence: u16 = 0;
+        let mut acc = complex::CZERO;
+        while divergence < maxiter && complex::sqmodule(&acc) <= 4.0 {
+            divergence = divergence + 1;
+            acc = self.next(acc)
+        }
+        let module = complex::sqmodule(&acc);
+        let divergence = divergence as f32 / maxiter as f32;
+        Intensity { module, divergence }
+    }
+
+    fn into_algo(&self) -> Algo {
+        Algo::Mandelbrot(self.clone())
+    }
+}
+
+impl Fractal for Algo {
+    fn eval(self: &Algo, maxiter: u16, x: Complex) -> Intensity {
+        match self {
+            Algo::Julia(julia) => julia.eval(maxiter, x),
+            Algo::Mandelbrot(mandelbrot) => mandelbrot.eval(maxiter, x),
+        }
+    }
+
+    fn into_algo(&self) -> Algo {
+        match self {
+            Algo::Julia(julia) => julia.into_algo(),
+            Algo::Mandelbrot(mandelbrot) => mandelbrot.into_algo(),
+        }
     }
 }
 
