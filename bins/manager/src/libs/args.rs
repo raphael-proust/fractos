@@ -48,4 +48,7 @@ pub struct Args {
 
     #[arg(short, long, default_value_t = DEFAULT_WINDOW_RESOLUTION, value_parser = parse_r)]
     pub resolution: WindowResolution,
+
+    #[arg(short, long, default_value = "")]
+    pub save: String,
 }
