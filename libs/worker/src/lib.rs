@@ -63,20 +63,7 @@ mod tests {
             c: Complex::new(0., 0.),
             divergence_threshold_square: 16.,
         };
-        let task = Task {
-            algo: Algo::Julia(j),
-
-            resolution: Resolution {
-                x: NonZeroU32::new(800).unwrap(),
-                y: NonZeroU32::new(600).unwrap(),
-            },
-            range: Range::new(
-                Point::new(0.0, 0.0).unwrap(),
-                Point::new(800., 600.).unwrap(),
-            )
-            .unwrap(),
-            itermax: NonZeroU16::new(100).unwrap(),
-        };
+        let task = Task::new(Algo::Julia(j), 800, 600, -1.0, -1.0, 1.0, 1.0, 100);
         let Answer { matrix: par_result } = par_handle_task(&task);
         let Answer { matrix: seq_result } = seq_handle_task(&task);
 
