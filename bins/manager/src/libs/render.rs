@@ -48,6 +48,35 @@ impl ColorMap for Fire {
     }
 }
 
+pub struct Rgb;
+
+impl ColorMap for Rgb {
+    fn of_intensity(&self, intensity: &Intensity) -> Color {
+        let Intensity {
+            divergence,
+            module: _,
+        } = intensity;
+        let div = boost(*divergence);
+        let div = normalize_u8(div);
+        let color = if div >= 250 { Color::RED } else if div > 200 { Color::GREEN } else { Color::BLUE };
+        color
+    }
+}
+
+pub struct Wow;
+
+impl ColorMap for Wow {
+    fn of_intensity(&self, intensity: &Intensity) -> Color {
+        let Intensity {
+            divergence: div,
+            module: _,
+        } = intensity;
+        let s = boost(*div);
+        let color = Color::color_from_hsv(div * 360., s, 0.8);
+        color
+    }
+}
+
 pub fn render_averaged_chunk(
     xoffs: u32,                   // screen-space coordinate
     yoffs: u32,                   // screen-space coordinate

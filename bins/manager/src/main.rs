@@ -141,7 +141,7 @@ fn main() {
             yres,
             block_size,
             &intensities,
-            &libs::render::Grayscale,
+            &libs::render::Wow,
             &mut d,
         );
     }
