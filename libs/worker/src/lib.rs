@@ -1,6 +1,6 @@
 use complex::Complex;
-use fractal::{Fractal, Intensity};
-use messages::{Algo, Answer, Task};
+use fractal::{Algo, Fractal, Intensity};
+use messages::{Answer, Task};
 
 use rayon::prelude::*;
 
@@ -53,9 +53,8 @@ pub fn handle_task(task: &Task) -> Answer {
 mod tests {
     use crate::{par_handle_task, seq_handle_task};
     use complex::Complex;
-    use fractal::Julia;
-    use messages::{point::Point, range::Range, resolution::Resolution, Algo, Answer, Task};
-    use std::num::{NonZeroU16, NonZeroU32};
+    use fractal::{Algo, Julia};
+    use messages::{Answer, Task};
 
     #[test]
     fn it_works() {

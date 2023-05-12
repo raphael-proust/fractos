@@ -18,9 +18,20 @@ pub struct Julia {
     pub divergence_threshold_square: f64,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub enum Algo {
+    Julia(Julia),
+}
+
 impl Julia {
     fn next(&self, x: Complex) -> Complex {
         complex::sq(x) + self.c
+    }
+}
+
+impl Into<Algo> for Julia {
+    fn into(self) -> Algo {
+        Algo::Julia(self)
     }
 }
 
