@@ -12,4 +12,6 @@ fractal = { path = "../../libs/fractal" }
 complex = { path = "../../libs/complex" }
 messages = {path = "../../libs/messages"}
 worker = { path = "../../libs/worker" }
-tokio = { version = "1.28", features = ["rt", "net", "macros", "rt-multi-thread", "sync"] }
+tokio = { version = "1.28", features = ["rt", "net", "macros", "rt-multi-thread", "sync", "io-util"] }
+serde = {workspace = true}
+serde_json = "1.0"
