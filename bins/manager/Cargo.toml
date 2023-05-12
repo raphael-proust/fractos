@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 raylib = "3.7.0"
+clap = { version = "4.2.7", features = ["derive"] }
 fractal = { path = "../../libs/fractal" }
 complex = { path = "../../libs/complex" }
 messages = {path = "../../libs/messages"}

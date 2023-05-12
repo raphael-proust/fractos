@@ -12,6 +12,12 @@ impl Complex {
     }
 }
 
+impl std::fmt::Display for Complex {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        f.write_fmt(format_args!("({},{})",self.re, self.im))
+    }
+}
+
 pub fn sqmodule(x: &Complex) -> f64 {
     (x.re * x.re) + (x.im * x.im)
 }
