@@ -9,13 +9,8 @@ use serde::{Deserialize, Serialize};
 use std::num::{NonZeroU16, NonZeroU32};
 
 #[derive(Serialize, Deserialize, Debug)]
-pub enum Algo {
-    Julia(fractal::Julia),
-}
-
-#[derive(Serialize, Deserialize, Debug)]
 pub struct Task {
-    pub algo: Algo,
+    pub algo: fractal::Algo,
     pub resolution: Resolution,
     pub range: Range,
     pub itermax: NonZeroU16,
@@ -23,7 +18,7 @@ pub struct Task {
 
 impl Task {
     pub fn new(
-        algo: Algo,
+        algo: fractal::Algo,
         resx: u32,
         resy: u32,
         rp0x: f64,
