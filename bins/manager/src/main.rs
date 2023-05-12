@@ -2,10 +2,16 @@ mod libs;
 use clap::Parser;
 use complex::Complex;
 use fractal::{Fractal, Intensity, Julia};
-use messages::Answer;
-use raylib::{color::Color, prelude::*};
-use worker;
+use libs::tasks_manager;
 use libs::tasksplitter;
+use messages::{point, range, resolution::Resolution, Answer, Task};
+use raylib::{color::Color, prelude::*};
+use std::io::Read;
+use std::io::Write;
+use std::num::NonZeroU16;
+use std::num::NonZeroU32;
+use tokio::net::{TcpListener, TcpStream};
+use worker;
 
 fn render(
     xres: u32,
@@ -36,7 +42,6 @@ fn render(
             &libs::render::Wow,
             d,
         );
-
     }
 }
 
@@ -54,8 +59,36 @@ fn next_block_size_down(b: u32) -> u32 {
         5 => 2,
         2 => 1,
         1 => 1,
-        _ => panic!()
+        _ => panic!(),
     }
+}
+
+async fn create_and_send_dummy_task(stream: &mut TcpStream) {
+    println!("Create dummy task");
+    let fractal_params = Complex::new(0.3, 0.5);
+    let x = NonZeroU32::new(2).unwrap();
+    let y = NonZeroU32::new(2).unwrap();
+    let resolution: Resolution = Resolution { x, y };
+    let min = point::Point::new(1_f64, 2_f64).unwrap();
+    let max = point::Point::new(3_f64, 4_f64).unwrap();
+    let range = range::Range::new(min, max).unwrap();
+    let algo = fractal::Algo::Julia(Julia {
+        c: fractal_params,
+        divergence_threshold_square: 16.,
+    });
+    let itermax = NonZeroU16::new(2).unwrap();
+    let task = Task {
+        algo,
+        resolution,
+        range,
+        itermax,
+    };
+    let mut stream = stream;
+    println!("Will call send task");
+    tasks_manager::send_task(&mut stream, task).await;
+    println!("Task sended, awaiting answer");
+    tasks_manager::read_answer(&mut stream).await;
+    println!("Answer received");
 }
 
 #[tokio::main]
@@ -82,68 +115,65 @@ async fn main() {
         divergence_threshold_square: 16.,
     };
 
+    let listener = TcpListener::bind("localhost:4242").await.unwrap();
 
     let mut xblocks = xres / block_size;
     let mut yblocks = yres / block_size;
+    loop {
+        let (stream, _) = listener.accept().await.unwrap();
+        let mut stream = stream;
+        create_and_send_dummy_task(&mut stream).await;
 
-    let mut dirty = true;
+        let mut dirty = true;
 
-    while !rl.window_should_close() {
-        let key_opt = rl.get_key_pressed();
-        match key_opt {
-            None => (),
-            Some(key) => match key {
-                KeyboardKey::KEY_J => {
-                    println!("j");
-                    max_iter = (max_iter * 5) / 6;
-                    dirty = true;
-                }
-                KeyboardKey::KEY_K => {
-                    max_iter = (max_iter * 6) / 5;
-                    dirty = true;
-                }
-                KeyboardKey::KEY_S => {
-                    println!("Saving to \"out.png\"");
-                    rl.take_screenshot(&thrd, "out.png");
-                }
-                _ => (),
-            },
-        };
+        while !rl.window_should_close() {
+            let key_opt = rl.get_key_pressed();
+            match key_opt {
+                None => (),
+                Some(key) => match key {
+                    KeyboardKey::KEY_J => {
+                        println!("j");
+                        max_iter = (max_iter * 5) / 6;
+                        dirty = true;
+                    }
+                    KeyboardKey::KEY_K => {
+                        max_iter = (max_iter * 6) / 5;
+                        dirty = true;
+                    }
+                    KeyboardKey::KEY_S => {
+                        println!("Saving to \"out.png\"");
+                        rl.take_screenshot(&thrd, "out.png");
+                    }
+                    _ => (),
+                },
+            };
 
-        let new_mouse_pos =  rl.get_mouse_position();
-        if mouse_pos != new_mouse_pos {
-            dirty = true;
-            block_size = starting_block_size;
-            xblocks = xres / block_size;
-            yblocks = yres / block_size;
-            mouse_pos = new_mouse_pos;
-            fractal.c = complex_of_window_position(mouse_pos.x as u32, mouse_pos.y as u32, xres, yres);
+            let new_mouse_pos = rl.get_mouse_position();
+            if mouse_pos != new_mouse_pos {
+                dirty = true;
+                block_size = starting_block_size;
+                xblocks = xres / block_size;
+                yblocks = yres / block_size;
+                mouse_pos = new_mouse_pos;
+                fractal.c =
+                    complex_of_window_position(mouse_pos.x as u32, mouse_pos.y as u32, xres, yres);
+            }
+
+            if !dirty && block_size > 1 {
+                dirty = true;
+                block_size = next_block_size_down(block_size);
+                xblocks = xres / block_size;
+                yblocks = yres / block_size;
+            }
+
+            let mut d = rl.begin_drawing(&thrd);
+            if dirty {
+                d.clear_background(Color::WHITE);
+                render(
+                    xres, yres, max_iter, &fractal, xblocks, yblocks, block_size, quad_exp, &mut d,
+                );
+                dirty = false;
+            }
         }
-
-        if !dirty && block_size > 1 {
-            dirty = true;
-            block_size = next_block_size_down(block_size);
-            xblocks = xres / block_size;
-            yblocks = yres / block_size;
-        }
-
-        let mut d = rl.begin_drawing(&thrd);
-        if dirty {
-            d.clear_background(Color::WHITE);
-            render(
-                xres,
-                yres,
-                max_iter,
-                &fractal,
-                xblocks,
-                yblocks,
-                block_size,
-                quad_exp,
-                &mut d,
-            );
-            dirty = false;
-        }
-
-
     }
 }

@@ -1,5 +1,7 @@
 use messages;
+use std::collections::LinkedList;
 use std::sync::Arc;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::mpsc::{channel, Receiver, Sender};
 use tokio::sync::RwLock;
@@ -107,7 +109,8 @@ async fn handle_new_connection(
 ) {
     loop {
         let task = new_task_receiver.write().await.recv().await.unwrap();
-        let answer = send_task(&mut conn, task.clone());
+        send_task(&mut conn, task.clone()).await;
+        let answer = read_answer(&mut conn).await;
         let finished_task = FinishedTask {
             result: answer,
             task,
@@ -116,6 +119,36 @@ async fn handle_new_connection(
     }
 }
 
-fn send_task(_conn: &mut TcpStream, _task: messages::Task) -> messages::Answer {
-    todo!()
+pub async fn send_task(stream: &mut TcpStream, task: messages::Task) {
+    println!("Send task");
+
+    let serialized_task = serde_json::to_vec(&task).unwrap();
+
+    let serialized_task_size = serialized_task.len() as u32;
+    println!("Serialized size : {}", serialized_task_size);
+    stream
+        .write_all(&serialized_task_size.to_be_bytes())
+        .await
+        .unwrap();
+
+    // Send serialized task
+    stream.write_all(&serialized_task).await.unwrap();
+}
+
+pub async fn read_answer(stream: &mut TcpStream) -> messages::Answer {
+    println!("Read answer");
+    let mut binary_size = [0_u8; 4];
+    stream.read_exact(&mut binary_size).await.unwrap();
+    let size = u32::from_be_bytes(binary_size);
+    println!("Will read:{} bytes", size);
+
+    // Recover the message of size from the stream
+    let mut msg = vec![0_u8; size as usize];
+    stream.read_exact(&mut msg).await.unwrap();
+    println!("Answer readed");
+
+    // Deserialize the message into an Answer
+    let answer: messages::Answer = serde_json::from_slice(&msg).unwrap();
+
+    answer
 }
