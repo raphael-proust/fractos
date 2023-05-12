@@ -1,5 +1,5 @@
 use complex::Complex;
-use fractal::{Algo, Fractal, Intensity};
+use fractal::{Algo, Fractal};
 use messages::{Answer, Task};
 
 use rayon::prelude::*;
@@ -27,7 +27,7 @@ enum Dispatch {
 fn dispatch_task(task: &Task, dispatch: Dispatch) -> Answer {
     let y_res = task.resolution.y.get();
     let size: u32 = task.resolution.x.get() * task.resolution.y.get();
-    let Algo::Julia(algo) = &task.algo;
+    let algo: Algo = task.algo.clone();
     let handler = |index| {
         let c = complex_of_pos(index, task, y_res);
         algo.eval(task.itermax.into(), c)
