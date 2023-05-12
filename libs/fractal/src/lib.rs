@@ -10,15 +10,16 @@ pub struct Intensity {
 
 pub trait Fractal {
     fn eval(&self, _: u16, _: Complex) -> Intensity;
+    fn into_algo(&self) -> Algo;
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Julia {
     pub c: Complex,
     pub divergence_threshold_square: f64,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Algo {
     Julia(Julia),
 }
@@ -26,12 +27,6 @@ pub enum Algo {
 impl Julia {
     fn next(&self, x: Complex) -> Complex {
         complex::sq(x) + self.c
-    }
-}
-
-impl Into<Algo> for Julia {
-    fn into(self) -> Algo {
-        Algo::Julia(self)
     }
 }
 
@@ -46,6 +41,10 @@ impl Fractal for Julia {
         let module = complex::sqmodule(&acc);
         let divergence = divergence as f32 / maxiter as f32;
         Intensity { module, divergence }
+    }
+
+    fn into_algo(&self) -> Algo {
+        Algo::Julia(self.clone())
     }
 }
 
