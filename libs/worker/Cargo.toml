@@ -9,3 +9,4 @@ edition = "2021"
 fractal = {path="../fractal"}
 messages = {path="../messages"}
 complex = {path="../complex"}
+rayon = "1.7.0"
