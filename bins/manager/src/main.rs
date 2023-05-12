@@ -9,14 +9,22 @@ use worker;
 const XRES: u32 = 800;
 const YRES: u32 = 600;
 
-fn compute_intensities(iter_max: u16, intensities: &mut Vec<Intensity>, fractal: &impl Fractal) {
+fn compute_intensities(
+    iter_max: u16,
+    intensities: &mut Vec<Intensity>,
+    fractal: &impl Fractal,
+    xblocks: u32,
+    yblocks: u32,
+    block_size: u32,
+) {
     intensities.clear();
-    let algo = fractal.clone().into_algo();
-    let task = Task::new(algo, XRES, YRES, -1.0, -1.0, 1.0, 1.0, iter_max);
-    let Answer {
-        matrix: mut par_result,
-    } = worker::handle_task(&task);
-    intensities.append(&mut par_result);
+    for y in 0..yblocks {
+        for x in 0..xblocks {
+            let c: Complex = complex_of_window_position(x * block_size, y * block_size, XRES, YRES);
+            let i: Intensity = fractal.eval(iter_max, c);
+            intensities.push(i);
+        }
+    }
 }
 
 fn complex_of_window_position(xpos: u32, ypos: u32, xres: u32, yres: u32) -> Complex {
@@ -29,7 +37,10 @@ fn complex_of_window_position(xpos: u32, ypos: u32, xres: u32, yres: u32) -> Com
 fn main() {
     let args = libs::args::Args::parse();
 
-    let (mut rl, thrd) = raylib::init().size(800, 600).title("Fractos").build();
+    let (mut rl, thrd) = raylib::init()
+        .size(XRES as i32, YRES as i32)
+        .title("Fractos")
+        .build();
 
     let mut max_iter = args.max_iter;
 
@@ -40,9 +51,22 @@ fn main() {
         divergence_threshold_square: 16.,
     };
 
-    compute_intensities(max_iter, &mut intensities, &fractal);
+    // TODO: block_size \in 1, 2, 5, 10
+    let mut block_size = 5;
 
-    let mut dirty = false;
+    let mut xblocks = XRES / block_size;
+    let mut yblocks = YRES / block_size;
+
+    compute_intensities(
+        max_iter,
+        &mut intensities,
+        &fractal,
+        xblocks,
+        yblocks,
+        block_size,
+    );
+
+    let mut dirty;
 
     while !rl.window_should_close() {
         let key_opt = rl.get_key_pressed();
@@ -76,11 +100,27 @@ fn main() {
         }
 
         if dirty {
-            compute_intensities(max_iter, &mut intensities, &fractal);
+            compute_intensities(
+                max_iter,
+                &mut intensities,
+                &fractal,
+                xblocks,
+                yblocks,
+                block_size,
+            );
         }
 
         let mut d = rl.begin_drawing(&thrd);
         d.clear_background(Color::WHITE);
-        libs::render::render(XRES, YRES, &intensities, &libs::render::Fire, &mut d);
+        libs::render::render_averaged_chunk(
+            0,
+            0,
+            XRES,
+            YRES,
+            block_size,
+            &intensities,
+            &libs::render::Fire,
+            &mut d,
+        );
     }
 }
