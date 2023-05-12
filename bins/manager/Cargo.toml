@@ -11,4 +11,5 @@ clap = { version = "4.2.7", features = ["derive"] }
 fractal = { path = "../../libs/fractal" }
 complex = { path = "../../libs/complex" }
 messages = {path = "../../libs/messages"}
+worker = { path = "../../libs/worker" }
 tokio = { version = "1.28", features = ["rt", "net", "macros", "rt-multi-thread", "sync"] }

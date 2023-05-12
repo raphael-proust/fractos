@@ -1,21 +1,22 @@
 mod libs;
+use clap::Parser;
 use complex::Complex;
 use fractal::{Fractal, Intensity, Julia};
+use messages::{Answer, Task};
 use raylib::{color::Color, prelude::*};
-use clap::Parser;
+use worker;
 
 const XRES: u32 = 800;
 const YRES: u32 = 600;
 
-fn compute_intensities(max_iter: u16, intensities: &mut Vec<Intensity>, fractal: &impl Fractal) {
+fn compute_intensities(iter_max: u16, intensities: &mut Vec<Intensity>, fractal: &impl Fractal) {
     intensities.clear();
-    for y in 0..YRES {
-        for x in 0..XRES {
-            let c: Complex = complex_of_window_position(x, y, XRES, YRES);
-            let i: Intensity = fractal.eval(max_iter, c);
-            intensities.push(i);
-        }
-    }
+    let algo = fractal.clone().into_algo();
+    let task = Task::new(algo, XRES, YRES, -1.0, -1.0, 1.0, 1.0, iter_max);
+    let Answer {
+        matrix: mut par_result,
+    } = worker::handle_task(&task);
+    intensities.append(&mut par_result);
 }
 
 fn complex_of_window_position(xpos: u32, ypos: u32, xres: u32, yres: u32) -> Complex {
@@ -26,7 +27,7 @@ fn complex_of_window_position(xpos: u32, ypos: u32, xres: u32, yres: u32) -> Com
 }
 
 fn main() {
-     let args = libs::args::Args::parse();
+    let args = libs::args::Args::parse();
 
     let (mut rl, thrd) = raylib::init().size(800, 600).title("Fractos").build();
 
