@@ -1,7 +1,7 @@
 mod libs;
 use clap::Parser;
 use complex::Complex;
-use fractal::{Fractal, Intensity, Julia};
+use fractal::{Algo, Fractal, Intensity, Julia, Mandelbrot};
 use libs::tasks_manager;
 use libs::tasksplitter;
 use messages::{point, range, resolution::Resolution, Answer, Task};
@@ -63,7 +63,7 @@ fn next_block_size_down(b: u32) -> u32 {
     }
 }
 
-async fn create_and_send_dummy_task(stream: &mut TcpStream) {
+async fn create_and_send_dummy_julia_task(stream: &mut TcpStream) {
     println!("Create dummy task");
     let fractal_params = Complex::new(0.3, 0.5);
     let x = NonZeroU32::new(2).unwrap();
@@ -76,6 +76,31 @@ async fn create_and_send_dummy_task(stream: &mut TcpStream) {
         c: fractal_params,
         divergence_threshold_square: 16.,
     });
+    let itermax = NonZeroU16::new(2).unwrap();
+    let task = Task {
+        algo,
+        resolution,
+        range,
+        itermax,
+    };
+    let mut stream = stream;
+    println!("Will call send task");
+    tasks_manager::send_task(&mut stream, task).await;
+    println!("Task sended, awaiting answer");
+    tasks_manager::read_answer(&mut stream).await;
+    println!("Answer received");
+}
+
+async fn create_and_send_mandelbrot_task(stream: &mut TcpStream) {
+    println!("Create dummy task");
+    let fractal_params = Complex::new(0.3, 0.5);
+    let x = NonZeroU32::new(2).unwrap();
+    let y = NonZeroU32::new(2).unwrap();
+    let resolution: Resolution = Resolution { x, y };
+    let min = point::Point::new(1_f64, 2_f64).unwrap();
+    let max = point::Point::new(3_f64, 4_f64).unwrap();
+    let range = range::Range::new(min, max).unwrap();
+    let algo = fractal::Algo::Mandelbrot(Mandelbrot { c: fractal_params });
     let itermax = NonZeroU16::new(2).unwrap();
     let task = Task {
         algo,
@@ -122,8 +147,8 @@ async fn main() {
     loop {
         let (stream, _) = listener.accept().await.unwrap();
         let mut stream = stream;
-        create_and_send_dummy_task(&mut stream).await;
-
+        create_and_send_dummy_julia_task(&mut stream).await;
+        //create_and_send_mandelbrot_task(&mut stream).await;
         let mut dirty = true;
 
         while !rl.window_should_close() {
