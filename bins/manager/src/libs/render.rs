@@ -7,7 +7,7 @@ pub trait ColorMap {
 }
 
 fn boost(x: f32) -> f32 {
-    1.0 - x.powf(0.2)
+    (1.0 - x).powf(0.2)
 }
 
 fn normalize_u8(x: f32) -> u8 {
@@ -28,7 +28,7 @@ impl ColorMap for Grayscale {
         } = intensity;
         let div = boost(*divergence);
         let div = normalize_u8(div);
-        let color = rcolor(div, div, div, div);
+        let color = rcolor(div, div, div, 255);
         color
     }
 }

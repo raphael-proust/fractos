@@ -88,7 +88,6 @@ fn main() {
             None => (),
             Some(key) => match key {
                 KeyboardKey::KEY_J => {
-                    println!("j");
                     max_iter = (max_iter * 5) / 6;
                     dirty = true;
                 }
