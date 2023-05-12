@@ -18,41 +18,34 @@ fn complex_of_pos(index: u32, task: &Task, y_res: u32) -> Complex {
     )
 }
 
-pub(crate) fn seq_handle_task(task: &Task) -> Answer {
-    let y_res = task.resolution.y.get();
-    let size: u32 = task.resolution.x.get() * task.resolution.y.get();
-    let Algo::Julia(algo) = &task.algo;
-    let res: Vec<Intensity> = (0..size)
-        .into_iter()
-        .map(|index| {
-            let c = complex_of_pos(index, task, y_res);
-            algo.eval(task.itermax.into(), c)
-        })
-        .collect();
-    Answer { matrix: res }
+enum Dispatch {
+    #[allow(dead_code)]
+    Seq,
+    Par,
 }
 
-pub(crate) fn par_handle_task(task: &Task) -> Answer {
+fn dispatch_task(task: &Task, dispatch: Dispatch) -> Answer {
     let y_res = task.resolution.y.get();
     let size: u32 = task.resolution.x.get() * task.resolution.y.get();
     let Algo::Julia(algo) = &task.algo;
-    let res: Vec<fractal::Intensity> = (0..size)
-        .into_par_iter()
-        .map(|index| {
-            let c = complex_of_pos(index, task, y_res);
-            algo.eval(task.itermax.into(), c)
-        })
-        .collect();
+    let handler = |index| {
+        let c = complex_of_pos(index, task, y_res);
+        algo.eval(task.itermax.into(), c)
+    };
+    let res: Vec<fractal::Intensity> = match dispatch {
+        Dispatch::Seq => (0..size).into_iter().map(handler).collect(),
+        Dispatch::Par => (0..size).into_par_iter().map(handler).collect(),
+    };
     Answer { matrix: res }
 }
 
 pub fn handle_task(task: &Task) -> Answer {
-    par_handle_task(task)
+    dispatch_task(task, Dispatch::Par)
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{par_handle_task, seq_handle_task};
+    use crate::{dispatch_task, handle_task, Dispatch};
     use complex::Complex;
     use fractal::{Algo, Julia};
     use messages::{Answer, Task};
@@ -64,8 +57,8 @@ mod tests {
             divergence_threshold_square: 16.,
         };
         let task = Task::new(Algo::Julia(j), 800, 600, -1.0, -1.0, 1.0, 1.0, 100);
-        let Answer { matrix: par_result } = par_handle_task(&task);
-        let Answer { matrix: seq_result } = seq_handle_task(&task);
+        let Answer { matrix: par_result } = handle_task(&task);
+        let Answer { matrix: seq_result } = dispatch_task(&task, Dispatch::Seq);
 
         assert!(seq_result.iter().eq(par_result.iter()));
     }
