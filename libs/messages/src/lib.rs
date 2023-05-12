@@ -8,7 +8,7 @@ use resolution::Resolution;
 use serde::{Deserialize, Serialize};
 use std::num::{NonZeroU16, NonZeroU32};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Task {
     pub algo: fractal::Algo,
     pub resolution: Resolution,
