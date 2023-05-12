@@ -7,7 +7,7 @@ pub trait ColorMap {
 }
 
 fn boost(x: f32) -> f32 {
-    1.0 - x.powf(0.2)
+    (1.0 - x).powf(0.2)
 }
 
 fn normalize_u8(x: f32) -> u8 {
@@ -44,6 +44,35 @@ impl ColorMap for Fire {
         let div = boost(*divergence);
         let div = normalize_u8(div);
         let color = rcolor(div, div / 2, div / 4, 255);
+        color
+    }
+}
+
+pub struct Rgb;
+
+impl ColorMap for Rgb {
+    fn of_intensity(&self, intensity: &Intensity) -> Color {
+        let Intensity {
+            divergence,
+            module: _,
+        } = intensity;
+        let div = boost(*divergence);
+        let div = normalize_u8(div);
+        let color = if div >= 250 { Color::RED } else if div > 200 { Color::GREEN } else { Color::BLUE };
+        color
+    }
+}
+
+pub struct Wow;
+
+impl ColorMap for Wow {
+    fn of_intensity(&self, intensity: &Intensity) -> Color {
+        let Intensity {
+            divergence: div,
+            module: _,
+        } = intensity;
+        let s = boost(*div);
+        let color = Color::color_from_hsv(div * 360., s, 0.8);
         color
     }
 }

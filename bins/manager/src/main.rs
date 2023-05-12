@@ -11,7 +11,11 @@ fn compute_intensities(xres: u32, yres: u32, iter_max: u16, intensities: &mut Ve
     let algo = fractal.clone().into_algo();
     let taskxres = xres / block_size;
     let taskyres = yres / block_size;
-    let task = Task::new(algo, taskxres, taskyres, -1.0, -1.0, 1.0, 1.0, iter_max);
+    let re_start = -1.0 + (2. / taskxres as f64);
+    let im_start = -1.0 + (2. / taskyres as f64);
+    let re_end = 1.0 + (2. / taskxres as f64);
+    let im_end = 1.0 + (2. / taskyres as f64);
+    let task = Task::new(algo, taskxres, taskyres, re_start, im_start, re_end, im_end, iter_max);
     let Answer {
         matrix: mut par_result,
     } = worker::handle_task(&task);
@@ -25,13 +29,23 @@ fn complex_of_window_position(xpos: u32, ypos: u32, xres: u32, yres: u32) -> Com
     c
 }
 
+fn next_block_size_down(b: u32) -> u32 {
+    match b {
+        20 => 10,
+        10 => 5,
+        5 => 2,
+        2 => 1,
+        1 => 1,
+        _ => panic!()
+    }
+}
+
 fn main() {
     let args = libs::args::Args::parse();
 
-    let args = libs::args::Args::parse();
-
     let mut max_iter = args.max_iter;
-    let mut block_size = args.block_size;
+    let starting_block_size = 10;
+    let mut block_size = starting_block_size;
     let xres = args.resolution.xres;
     let yres = args.resolution.yres;
 
@@ -39,6 +53,7 @@ fn main() {
         .size(xres as i32, yres as i32)
         .title("Fractos")
         .build();
+    let mut mouse_pos = rl.get_mouse_position();
 
     let mut intensities: Vec<Intensity> = vec![];
 
@@ -73,7 +88,6 @@ fn main() {
             None => (),
             Some(key) => match key {
                 KeyboardKey::KEY_J => {
-                    println!("j");
                     max_iter = (max_iter * 5) / 6;
                     dirty = true;
                 }
@@ -85,17 +99,27 @@ fn main() {
             },
         };
 
-        let is_mouse_down = rl.is_mouse_button_down(raylib::consts::MouseButton::MOUSE_LEFT_BUTTON);
-
-        if is_mouse_down {
+        let new_mouse_pos =  rl.get_mouse_position();
+        if mouse_pos != new_mouse_pos {
             dirty = true;
-            let mouse_pos = rl.get_mouse_position();
-            let xpos = mouse_pos.x as u32;
-            let ypos = mouse_pos.y as u32;
-            fractal.c = complex_of_window_position(xpos, ypos, xres, yres);
+            block_size = starting_block_size;
+            mouse_pos = new_mouse_pos;
+            fractal.c = complex_of_window_position(mouse_pos.x as u32, mouse_pos.y as u32, xres, yres);
         }
 
         if dirty {
+            compute_intensities(
+                xres,
+                yres,
+                max_iter,
+                &mut intensities,
+                &fractal,
+                xblocks,
+                yblocks,
+                block_size,
+            );
+        } else if block_size > 1 {
+            block_size = next_block_size_down(block_size);
             compute_intensities(
                 xres,
                 yres,
@@ -117,7 +141,7 @@ fn main() {
             yres,
             block_size,
             &intensities,
-            &libs::render::Fire,
+            &libs::render::Wow,
             &mut d,
         );
     }
