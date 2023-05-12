@@ -1,8 +1,8 @@
 use messages;
 use std::sync::Arc;
-use tokio::sync::RwLock;
 use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::mpsc::{channel, Receiver, Sender};
+use tokio::sync::RwLock;
 use tokio::task::JoinHandle;
 
 pub const WELCOME_PORT: u16 = 4242;
@@ -89,7 +89,8 @@ fn welcome(
             let stop_lock = stop_lock.clone();
 
             let _conn_thread = tokio::task::spawn(async move {
-                handle_new_connection(conn, new_task_receiver, finished_task_sender, stop_lock).await;
+                handle_new_connection(conn, new_task_receiver, finished_task_sender, stop_lock)
+                    .await;
             });
             // TODO register thread for drop
             //threads.write().unwrap().push(connThread);
@@ -106,14 +107,15 @@ async fn handle_new_connection(
 ) {
     loop {
         let task = new_task_receiver.write().await.recv().await.unwrap();
-        let answer = send_task(&mut conn, task);
-        let finished_task = FinishedTask{result:answer,task};
+        let answer = send_task(&mut conn, task.clone());
+        let finished_task = FinishedTask {
+            result: answer,
+            task,
+        };
         finished_task_sender.send(finished_task).await.unwrap();
     }
 }
 
 fn send_task(_conn: &mut TcpStream, _task: messages::Task) -> messages::Answer {
-
     todo!()
-
 }
