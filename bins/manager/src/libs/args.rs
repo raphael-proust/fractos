@@ -46,9 +46,6 @@ pub struct Args {
     #[arg(short, long, default_value_t = 50)]
     pub max_iter: u16,
 
-    #[arg(short, long, default_value_t = 10)]
-    pub block_size: u32,
-
     #[arg(short, long, default_value_t = DEFAULT_WINDOW_RESOLUTION, value_parser = parse_r)]
     pub resolution: WindowResolution,
 }

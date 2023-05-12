@@ -28,7 +28,7 @@ impl ColorMap for Grayscale {
         } = intensity;
         let div = boost(*divergence);
         let div = normalize_u8(div);
-        let color = rcolor(div, div, div, 255);
+        let color = rcolor(div, div, div, div);
         color
     }
 }
