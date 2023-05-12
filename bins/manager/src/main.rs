@@ -2,6 +2,7 @@ mod libs;
 use complex::Complex;
 use fractal::{Fractal, Intensity, Julia};
 use raylib::{color::Color, prelude::*};
+use clap::Parser;
 
 const XRES: u32 = 800;
 const YRES: u32 = 600;
@@ -25,16 +26,16 @@ fn complex_of_window_position(xpos: u32, ypos: u32, xres: u32, yres: u32) -> Com
 }
 
 fn main() {
+     let args = libs::args::Args::parse();
+
     let (mut rl, thrd) = raylib::init().size(800, 600).title("Fractos").build();
 
-    let mut max_iter = 100;
+    let mut max_iter = args.max_iter;
 
     let mut intensities: Vec<Intensity> = vec![];
 
-    let fractal_params = Complex::new(0.3, 0.5);
-
     let mut fractal = Julia {
-        c: fractal_params,
+        c: args.julia_constant,
         divergence_threshold_square: 16.,
     };
 
