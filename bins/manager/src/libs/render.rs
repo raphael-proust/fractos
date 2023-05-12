@@ -48,6 +48,53 @@ impl ColorMap for Fire {
     }
 }
 
+pub fn render_averaged_chunk(
+    xoffs: u32,                   // screen-space coordinate
+    yoffs: u32,                   // screen-space coordinate
+    xsize: u32,                   // screen-space coordinate
+    ysize: u32,                   // screen-space coordinate
+    block_size: u32,              // screen-space size of a block
+    intensities: &Vec<Intensity>, // row-major averaged-space indexing
+    color_map: &impl ColorMap,
+    d: &mut RaylibDrawHandle,
+) -> () {
+    assert!(xsize % block_size == 0);
+    assert!(ysize % block_size == 0);
+    let xblocks = xsize / block_size;
+    let yblocks = ysize / block_size;
+    for yb in 0..yblocks {
+        for xb in 0..xblocks {
+            let index: usize = (xb + yb * xblocks) as usize;
+            let c = color_map.of_intensity(&intensities[index]);
+            let xstart = xoffs + xb * block_size;
+            let ystart = yoffs + yb * block_size;
+            for y in ystart..ystart + block_size {
+                for x in xstart..xstart + block_size {
+                    d.draw_pixel(x as i32, y as i32, c);
+                }
+            }
+        }
+    }
+}
+
+pub fn render_chunk(
+    xoffs: u32,
+    yoffs: u32,
+    xsize: u32,
+    ysize: u32,
+    intensities: &Vec<Intensity>,
+    color_map: &impl ColorMap,
+    d: &mut RaylibDrawHandle,
+) -> () {
+    for y in yoffs..yoffs + ysize {
+        for x in xoffs..xoffs + xsize {
+            let index: usize = (x + y * xsize) as usize;
+            let c = color_map.of_intensity(&intensities[index]);
+            d.draw_pixel(x as i32, y as i32, c);
+        }
+    }
+}
+
 pub fn render(
     xres: u32,
     yres: u32,
@@ -55,11 +102,5 @@ pub fn render(
     color_map: &impl ColorMap,
     d: &mut RaylibDrawHandle,
 ) -> () {
-    for y in 0..yres {
-        for x in 0..xres {
-            let index: usize = (x + y * xres) as usize;
-            let c = color_map.of_intensity(&intensities[index]);
-            d.draw_pixel(x as i32, y as i32, c);
-        }
-    }
+    render_chunk(0, 0, xres, yres, intensities, color_map, d);
 }
